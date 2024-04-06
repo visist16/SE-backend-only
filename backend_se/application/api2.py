@@ -3,7 +3,7 @@ import requests
 from flask import jsonify
 from datetime import datetime
 from dateutil import tz, parser
-from application.models import User, Response, Ticket, FAQ, Category, Flagged_Post
+from application.models import *
 from application.models import db
 from application.routes import token_required
 from application.workers import celery

@@ -13,72 +13,57 @@ from datetime import datetime
 
 class User(db.Model):
     __tablename__='user'
-    user_id=db.Column(db.Integer,primary_key=True,autoincrement=True)
-    user_name=db.Column(db.String(100),unique=True,nullable=False)
-    #name=db.Column(db.String(100),nullable=False)
+    id=db.Column(db.Integer,primary_key=True,autoincrement=True)
+    username=db.Column(db.String(100),unique=True,nullable=False)
     password=db.Column(db.String(100),nullable=False)
-    email_id=db.Column(db.String(100),unique=True,nullable=False)
-    role_id=db.Column(db.Integer,nullable=False) #Role ID for students is 1, for Support Agents is 2, Admins is 3, Manager is 4.
-    responses = db.relationship('Response', back_populates='responder', lazy='subquery')
-    tickets = db.relationship('Ticket',  back_populates='creator', lazy='subquery')
+    email=db.Column(db.String(100),unique=True,nullable=False)
+    role=db.Column(db.Integer,nullable=False) #Role ID for students is 1, for Support Agents is 2, Admins is 3, Manager is 4.
+    discourse_id=db.Column(db.Integer, unique=True, nullable=False) 
+    status=db.Column(db.Boolean, default=False) #confirmation status
+    notification=db.Column(db.Boolean, default=True)
+    email_notif=db.Column(db.Boolean, default=True)
+    webhook_notif=db.Column(db.Boolean, default=True)
 
-class Response(db.Model):
-    response_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.ticket_id'))
-    response = db.Column(db.String(200), nullable=False) 
-    responder_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
-    response_timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
-    parent_list = db.relationship('Ticket',back_populates='responses', lazy='subquery')
-    responder = db.relationship('User', back_populates='responses', lazy='subquery')
-
-class Ticket(db.Model):
-    ticket_id=db.Column(db.Integer,primary_key=True,autoincrement=True)
+class Ticket(db.Model):         #Ticket is Private (Invisible to peers,visible to staff)
+    id=db.Column(db.Integer,primary_key=True,autoincrement=True)
     title=db.Column(db.String(100),nullable=False)
     description=db.Column(db.String(100),nullable=False)
-    creation_date=db.Column(db.DateTime,nullable=False, default=datetime.utcnow())
-    creator_id=db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
-    number_of_upvotes=db.Column(db.Integer,default=0)
-    is_read=db.Column(db.Boolean,nullable=False)
-    is_open=db.Column(db.Boolean,nullable=False)
-    is_offensive=db.Column(db.Boolean,nullable=False)
-    is_FAQ=db.Column(db.Boolean,nullable=False)
-    responses = db.relationship('Response', back_populates='parent_list', lazy='subquery')
-    creator = db.relationship('User', back_populates='tickets', lazy='subquery')
-    rating = db.Column(db.Integer)
+    date=db.Column(db.DateTime,nullable=False, default=datetime.now())
+    creator=db.Column(db.Integer, nullable=False)
+    category=db.Column(db.Integer,nullable=False)  #discourse category id
+    tags=db.Column(db.String(100))
+    offensive=db.Column(db.Boolean, default=False)
 
-class Category(db.Model):
-    category = db.Column(db.String(50), primary_key=True)
+    escalated=db.Column(db.Boolean, default=False)
+    resolved=db.Column(db.Boolean, default=False)
+    merged=db.Column(db.Integer, default=-1) #-1 means unmerged, any other int means the id of topic
+
+class Response(db.Model):         #Response to Tickets
+    id=db.Column(db.Integer,primary_key=True,autoincrement=True)
+    ticket_id=db.Column(db.Integer, nullable=False)
+    responder=db.Column(db.Integer, nullable=False)
+    response=db.Column(db.String(100),nullable=False)
+    date=db.Column(db.DateTime,nullable=False, default=datetime.now())
+    
+class CategoryAllotted(db.Model):
+    staff_id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.Integer, primary_key=True)
+
+class Topic(db.Model):
+    topic_id = db.Column(db.Integer, primary_key=True)
+    solution_post_id = db.Column(db.Integer)
+
+class Matches(db.Model):
+    topic_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, primary_key=True)
+    resolved = db.Column(db.Boolean, default=False)
 
 class FAQ(db.Model):
-    ticket_id = db.Column(db.Integer,db.ForeignKey('ticket.ticket_id'),primary_key=True)
-    category = db.Column(db.String, db.ForeignKey('category.category'))
-    is_approved = db.Column(db.Boolean,nullable=False)
-    ticket = db.relationship('Ticket', backref='faq')
+    topic_id = db.Column(db.Integer, primary_key=True)
+    solution_post_id = db.Column(db.Integer,nullable=False)
+    is_approved = db.Column(db.Boolean,default=False) #requested by staff,approved by admin
 
-class Flagged_Post(db.Model):
-      ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.ticket_id'), primary_key = True)
-      flagger_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
-      creator_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
-      is_approved = db.Column(db.Boolean, nullable = False, default = False)
-      is_rejected = db.Column(db.Boolean, nullable = False, default = False)
-
-def token_required(function):
-	@functools.wraps(function)
-	def loggedin(*args,**kwargs):
-		auth_token=None
-		# try:
-		# 	auth_token = request.headers['secret_authtoken']
-		
-		# except:
-		# 	return jsonify({"status":'unsuccessful, missing the authtoken'})
-		auth_token =local_token
-		try: 
-			output = jwt.decode(auth_token,Config.SECRET_KEY,algorithms=["HS256"])
-			#print(output)
-			user = User.query.filter_by(user_id = output["user_id"]).first()
-		except:
-			return jsonify({"status":"failure, your token details do not match"})
-		
-		return function(user,*args,**kwargs)
-	return loggedin
+class Subscription(db.Model):
+    user_id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.Integer, primary_key=True) #category id
 

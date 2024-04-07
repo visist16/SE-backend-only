@@ -1,6 +1,6 @@
 from application import app, api, celery, api2
 
-from application.api import *
+from application.userapi import *
 from application.api2 import *
 from application.ticketapi import *
 from application.discourseapi import *
@@ -23,10 +23,15 @@ api.add_resource(TicketDelete,'/api/ticket/<int:ticket_id>')
 api.add_resource(UserDelete,'/api/user/<int:user_id>') 
 api.add_resource(ResponseAPI_by_responseID_delete, '/api/respRespDel/<int:responder_id>/<int:response_id>')
 
-########################################################
+########################DISCOURSE APIS################################
 api.add_resource(Category, '/api/discourse/category')
 api.add_resource(Topic, '/api/discourse/topic')
 api.add_resource(Notifications, '/api/discourse/notifications')
+
+########################LOCAL APIS#####################################
+api.add_resource(YourTickets, '/api/tickets')
+api.add_resource(NewTicket, '/api/newticket')
+api.add_resource(UserProfile, '/api/profile')
 
 from application.routes import *
 if __name__ == '__main__':

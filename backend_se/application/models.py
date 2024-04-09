@@ -51,7 +51,7 @@ class CategoryAllotted(db.Model):
 
 class Topic(db.Model):
     topic_id = db.Column(db.Integer, primary_key=True)
-    solution_post_id = db.Column(db.Integer)
+    solution_post_id = db.Column(db.Integer, default=-1)    #-1 means unresolved topics 
 
 class Matches(db.Model):
     topic_id = db.Column(db.Integer, primary_key=True)

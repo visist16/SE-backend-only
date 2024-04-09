@@ -1,5 +1,6 @@
 from flask_restful import Resource, request, abort
 from flask import jsonify
+import requests
 from datetime import datetime
 from dateutil import tz, parser
 from application.models import *
@@ -13,6 +14,15 @@ import jwt
 from .config import Config
 from werkzeug.exceptions import HTTPException 
 from application import index
+
+API_TOKEN="77a052969dae8a3d77c97021a8b53ef18d191761a4079c0487f255eadfcfcaff"
+USER="21f1007034"                ##Just configured only for Unit Testing
+
+headers = {
+            "Api-key": API_TOKEN,
+            "Api-Username": USER
+        }
+
 
 class Login(Resource):
     def post(self):
@@ -37,6 +47,27 @@ class Login(Resource):
         else:
             abort(401, message="Bad Email or Password")
   
+class UserProfile(Resource):
+    # @token_required
+    def get(self):
+        try:
+            r=request.json
+            id=r.get('user_id')
+            user=User.query.filter_by(id=id).first()
+            d = {
+                'username': user.username,
+                'email': user.email,
+                'role': user.role,
+                'discourse_id': user.discourse_id,
+                'status': user.status,
+                'notification': user.notification,
+                'email_notif': user.email_notif,
+                'webhook_notif': user.webhook_notif
+                }   
+            return jsonify({"data": d})
+        except:
+            abort(401,message="Failed to fetch user details")
+
 
 class YourTickets(Resource):
     # @token_required
@@ -58,7 +89,7 @@ class YourTickets(Resource):
             d['resolved']=t.resolved
             d['merged']=t.merged
             result.append(d)
-            return jsonify({"data": result})
+        return jsonify({"data": result})
      
 class NewTicket(Resource):       
     # @token_required
@@ -77,23 +108,51 @@ class NewTicket(Resource):
         except:
             abort(401,message="Failed to create ticket")
         
-class UserProfile(Resource):
-    # @token_required
+
+class Recommendations(Resource):
+    #GET RECOMMENDATIONS BEFORE CREATING TICKETS 
+    #SO THAT USERS CAN VIEW/MATCH THEIR ISSUES
+
     def get(self):
         try:
             r=request.json
-            id=r.get('user_id')
-            user=User.query.filter_by(id=id).first()
-            d = {
-                'username': user.username,
-                'email': user.email,
-                'role': user.role,
-                'discourse_id': user.discourse_id,
-                'status': user.status,
-                'notification': user.notification,
-                'email_notif': user.email_notif,
-                'webhook_notif': user.webhook_notif
-                }   
-            return jsonify({"data": d})
+            category=r.get('category')  #cat id
+            tags=r.get('tags') 
+            response=requests.post()
+            return response.json()
         except:
-            abort(401,message="Failed to fetch user details")
+            abort(401,message="Failed to create ticket")
+        
+
+class MatchTopic(Resource):
+    #Upon getting shown recommended topics,
+    #if the user finds his issue listed there,
+    #they can match it with that topic instead 
+    #of creating a new ticket
+    def post(self):
+        try:
+            r=request.json
+            user_id=r.get('user_id')
+            topic_id=r.get('topic_id')
+
+            m=Matches(user_id=user_id,
+                      topic_id=topic_id)
+            db.session.add(m)
+            db.session.commit()
+            return jsonify({"message": "Ticket matched with Topic"})
+        except:
+            abort(401,message="Ticket didn't match")
+
+class FAQ(Resource):
+    def get(self):
+        faqs=FAQ.query.all()
+        data=[]
+        for faq in faqs:
+            id=faq.topic_id
+            sol_id=faq.solution_post_id
+            json={
+                "post_ids[]":sol_id
+            }
+            response = requests.put(f'http://localhost:4200/t/{id}/posts.json',json=json, headers=headers)
+            data=data.append(response)
+

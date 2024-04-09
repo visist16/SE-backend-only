@@ -23,13 +23,8 @@ headers = {
             "Api-Username": USER
         }
 
-class Category(Resource): 
-    # LIST ALL CATEGORIES
-    def get(self):
-       x=requests.get("http://localhost:4200/categories.json")
-       return x.json()
-    
 
+class CreateCategory(Resource):
     #CREATE A CATEGORY
     #can be restricted to admin later
     def post(self):
@@ -56,6 +51,7 @@ class Category(Resource):
         else:
             abort(404,message="Failed to create Category")
 
+class EditCategory(Resource):
     #UPDATE A CATEGORY
     #can be restricted to admin later
     def patch(self):
@@ -69,57 +65,3 @@ class Category(Resource):
             return jsonify({"message":"Category updated successfully"})
         else:
             abort(404,message="Failed to update Category")
-
-
-
-class Topic(Resource):
-
-    #GET ALL TOPICS BY EITHER CATEGORY ID OR CATEGORY SLUG
-    def get(self):
-        r=request.json
-        slug=r.get('slug')
-        id=r.get('id')
-        
-        response = requests.get(f'http://localhost:4200/c/{slug}/{id}.json', headers=headers)
-        return response.json()
-
-    #CREATE A TOPIC FROM LOCAL TICKET
-    #RESTRICTED TO STAFF
-    def post(self):
-        r=request.json
-        id=r.get('ticket_id')
-        cat_id=r.get('cat_id')
-        #CATEGORY FIELD WILL BE ADDED TO TICKET TABLE SOON!!!!
-        t=Ticket.query.filter_by(ticket_id=id).first()
-        data = {
-            "title":t.title,
-            "raw":t.description,
-            "category":cat_id
-        }
-        
-        response = requests.post(f'http://localhost:4200/posts.json',json=data, headers=headers)
-        return response.json()
-    
-    #EDIT AN EXISTING TOPIC
-    def patch(self):
-        r=request.json
-        id=r.get('topic_id')
-        title=r.get('title')
-        category_id=r.get('category_id')
-
-        data = {
-            "topic":{
-            "title":title,
-            "category_id":category_id
-        }
-        }
-        response = requests.put(f'http://localhost:4200/t/-/{id}.json',json=data, headers=headers)
-        return response.json()
-
-
-class Notifications(Resource):
-    #GET ALL NOTIFICATIONS BY USER ID
-    def get(self):
-        
-        response = requests.get(f'http://localhost:4200/notifications.json',headers=headers)
-        return response.json()

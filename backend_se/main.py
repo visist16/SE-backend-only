@@ -1,9 +1,12 @@
 from application import app, api, celery, api2
 
-from application.userapi import *
+from application.apiuser import *
+from application.apistaff import *
+from application.apiadmin import *
+from application.apigeneral import *
 from application.api2 import *
 from application.ticketapi import *
-from application.discourseapi import *
+
 
 api.add_resource(Sitaram, '/api/sitaram_user')
 api.add_resource(Discourse_post, '/api/sitaram_post1')
@@ -23,15 +26,29 @@ api.add_resource(TicketDelete,'/api/ticket/<int:ticket_id>')
 api.add_resource(UserDelete,'/api/user/<int:user_id>') 
 api.add_resource(ResponseAPI_by_responseID_delete, '/api/respRespDel/<int:responder_id>/<int:response_id>')
 
-########################DISCOURSE APIS################################
-api.add_resource(Category, '/api/discourse/category')
-api.add_resource(Topic, '/api/discourse/topic')
-api.add_resource(Notifications, '/api/discourse/notifications')
+########################GENERAL APIS###################################
 
-########################LOCAL APIS#####################################
-api.add_resource(YourTickets, '/api/tickets')
-api.add_resource(NewTicket, '/api/newticket')
-api.add_resource(UserProfile, '/api/profile')
+api.add_resource(Notifications, '/api/notifications')
+api.add_resource(Topics, '/api/topics')
+api.add_resource(Categories, '/api/categories')
+
+########################USER APIS######################################
+
+api.add_resource(UserProfile, '/api/user/profile')
+api.add_resource(YourTickets, '/api/user/tickets')
+api.add_resource(NewTicket, '/api/user/newticket')
+api.add_resource(Recommendations, '/api/user/recommendations')
+api.add_resource(MatchTopic, '/api/user/match')
+
+########################STAFF APIS#####################################
+
+api.add_resource(CreateTopic, '/api/staff/createtopic')
+api.add_resource(EditTopic, '/api/staff/edittopic')
+
+########################ADMIN APIS#####################################
+
+api.add_resource(CreateCategory, '/api/admin/createcategory')
+api.add_resource(EditCategory, '/api/admin/editcategory')
 
 from application.routes import *
 if __name__ == '__main__':

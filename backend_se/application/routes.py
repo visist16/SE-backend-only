@@ -54,12 +54,12 @@ def token_required(function):
 	@functools.wraps(function)
 	def loggedin(*args,**kwargs):
 		auth_token=None
-		# try:
-		# 	auth_token = request.headers['secret_authtoken']
+		try:
+			auth_token = request.headers['secret_authtoken']
 		
-		# except:
-		# 	return jsonify({"status":'unsuccessful, missing the authtoken'})
-		auth_token =local_token
+		except:
+			return jsonify({"status":'unsuccessful, missing the authtoken'})
+		# auth_token =local_token
 		try: 
 			output = jwt.decode(auth_token,Config.SECRET_KEY,algorithms=["HS256"])
 			#print(output)
@@ -85,6 +85,28 @@ def get_users(current_user):
         } for user in users]
 
     return jsonify(results)
+
+#jwt tockenisation de-dockenization
+#ajeet
+def token_required(function):
+	@functools.wraps(function)
+	def loggedin(*args,**kwargs):
+		auth_token=None
+		# try:
+		# 	auth_token = request.headers['secret_authtoken']
+		
+		# except:
+		# 	return jsonify({"status":'unsuccessful, missing the authtoken'})
+		auth_token =local_token
+		try: 
+			output = jwt.decode(auth_token,Config.SECRET_KEY,algorithms=["HS256"])
+			#print(output)
+			user = User.query.filter_by(id = output["id"]).first()
+		except:
+			return jsonify({"status":"failure, your token details do not match"})
+		
+		return function(user,*args,**kwargs)
+	return loggedin
 
 # from application.workers import celery
 # from application.tasks import send_email

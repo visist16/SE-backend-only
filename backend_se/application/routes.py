@@ -17,7 +17,7 @@ import jwt
 from .config import Config
 from werkzeug.exceptions import HTTPException 
 from application import index
-
+ 
 local_token=""
 @app.route("/")
 def home():

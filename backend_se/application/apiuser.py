@@ -15,8 +15,8 @@ from .config import Config
 from werkzeug.exceptions import HTTPException 
 from application import index
 
-API_TOKEN="77a052969dae8a3d77c97021a8b53ef18d191761a4079c0487f255eadfcfcaff"
-USER="21f1007034"                ##Just configured only for Unit Testing
+API_TOKEN="805203cb88be4b6020394bb489667f1052bc2fb93ad1d66cc836f2dbfd0c69af"
+USER="21f1000907"               ##Just configured only for Unit Testing
 
 headers = {
             "Api-key": API_TOKEN,
@@ -24,28 +24,7 @@ headers = {
         }
 
 
-class Login(Resource):
-    def post(self):
-        if request.is_json:
-            email = request.json["email"]
-            password = request.json["password"]
-        else:
-            email = request.form["email"]
-            password = request.form["password"]
-        test = User.query.filter_by(email_id=email).first()
-        # print(test)
-        if (test is None):
-            abort(409,message="User does not exist")
-        elif (test.password == password):
-            token = jwt.encode({
-                'user_id': test.user_id,
-                'exp': datetime.now() + timedelta(minutes=80)
-            }, Config.SECRET_KEY, algorithm="HS256")
-            # access_token = create_access_token(identity=email)
-            # print(token)
-            return jsonify({"message":"Login Succeeded!", "token":token,"user_id":test.user_id,"role":test.role_id})
-        else:
-            abort(401, message="Bad Email or Password")
+
   
 class UserProfile(Resource):
     # @token_required

@@ -13,29 +13,6 @@ import jwt
 from .config import Config
 from werkzeug.exceptions import HTTPException 
 from application import index
-
-class Login(Resource):
-    def post(self):
-        if request.is_json:
-            email = request.json["email"]
-            password = request.json["password"]
-        else:
-            email = request.form["email"]
-            password = request.form["password"]
-        test = User.query.filter_by(email_id=email).first()
-        # print(test)
-        if (test is None):
-            abort(409,message="User does not exist")
-        elif (test.password == password):
-            token = jwt.encode({
-                'user_id': test.user_id,
-                'exp': datetime.utcnow() + timedelta(minutes=80)
-            }, Config.SECRET_KEY, algorithm="HS256")
-            # access_token = create_access_token(identity=email)
-            # print(token)
-            return jsonify({"message":"Login Succeeded!", "token":token,"user_id":test.user_id,"role":test.role_id})
-        else:
-            abort(401, message="Bad Email or Password")
   
 
 class TicketAPI(Resource):

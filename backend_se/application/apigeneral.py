@@ -122,6 +122,7 @@ class Verification(Resource):
 #ajeet
 class Login(Resource):
     def post(self):
+        print("test login1")
         flag=False
         if request.is_json:
             email = request.json["email"]
@@ -172,6 +173,6 @@ class Login(Resource):
             if(flag):
                 return jsonify({"message":"User email and user_id has been updated, kindly use new discorse email or user_id from next time", "token":token,"user_id":test.user_id,"role":test.role_id})
             else:
-                return jsonify({"message":"Loggedin successfully !", "token":token,"user_id":test.id,"role":test.role})
+                return jsonify({"message":"Loggedin successfully !", "token":token,"id":test.id,"role":test.role})
         else:
             abort(401, message="Bad Email or Password")

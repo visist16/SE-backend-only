@@ -1,10 +1,9 @@
-from application import app, api, celery, api2
+from application import app, api, celery
 
 from application.apiuser import *
 from application.apistaff import *
 from application.apiadmin import * 
 from application.apigeneral import *
-from application.api2 import *
 from application.ticketapi import *
 
 
@@ -31,8 +30,8 @@ api.add_resource(Categories, '/api/categories')
 #discourse apis from ajeet
 api.add_resource(Verification, '/api/discourse/self_account/activate')
 api.add_resource(Registration, '/api/discourse/register')
-api.add_resource(Sitaram, '/api/discourse/sitaram_user')
-api.add_resource(Discourse_post, '/api/discourse/sitaram_post1')
+# api.add_resource(Sitaram, '/api/discourse/sitaram_user')
+# api.add_resource(Discourse_post, '/api/discourse/sitaram_post1')
 api.add_resource(Login,'/login')
 
 ########################USER APIS######################################

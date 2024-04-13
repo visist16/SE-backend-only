@@ -57,3 +57,150 @@ class EditTopic(Resource):
         }
         response = requests.put(f'http://localhost:4200/t/-/{id}.json',json=data, headers=headers)
         return response.json()
+
+class StaffProfile(Resource):
+    #@token_required
+    def get(self):
+        try:
+            id=2
+            #id=user.id
+            user=User.query.filter_by(id=id).first()
+            d = {
+                'username': user.username,
+                'email': user.email,
+                'role': user.role,
+                'discourse_id': user.discourse_id,
+                'status': user.status,
+                'notification': user.notification,
+                'email_notif': user.email_notif,
+                'webhook_notif': user.webhook_notif
+                }   
+            return jsonify({"data": d})
+        except:
+            abort(401,message="Failed to fetch user details")
+
+class AllottedCategory(Resource):
+    #@token_required
+    def get(self):
+        try:
+            id=2
+            #id=user.id
+            cat=CategoryAllotted.query.filter_by(staff_id=id , is_approved=1).all()
+            cat_list=[]
+            for c in cat:
+                d = {
+                    'staff_id':c.staff_id,
+                    'category':c.category
+                    }   
+                cat_list.append(d)
+            return jsonify({"data": cat_list})
+        except:
+            abort(401,message="Failed to fetch alloted category")
+
+class Respond(Resource):
+    #@token_required
+    def post(self):
+        try:
+            '''
+            {
+            "ticket_id":"",
+            "responder":"", //staff_id here
+            "response":""  //response here
+            }
+            '''
+            r=request.json
+            d =Response(
+                ticket_id= r['ticket_id'],
+                responder= r['responder'],
+                response= r['response']
+            )
+            db.session.add(d)
+            db.session.commit()   
+            return jsonify({"message": "successfully responded"})
+        except:
+            abort(401,message="Failed to add response")
+
+class RequestFAQ(Resource):
+    #@token_required
+    def post(self):
+        try:
+            '''
+            {
+            "topic_id":"",
+            "solution_post_id":""
+            }
+            '''
+            r=request.json
+            d = FAQ(
+                topic_id= r['topic_id'],
+                solution_post_id= r['solution_post_id']
+            ) 
+            db.session.add(d)
+            db.session.commit()
+            return jsonify({"message": "faq request is added successfully"})
+        except:
+            abort(401,message="Failed to add faq request")
+
+class RequestCategory(Resource):
+    #@token_required
+    def post(self):
+        try:
+            '''
+            {
+            "staff_id":"",
+            "category":""
+            }
+            '''
+            r=request.json
+            d = CategoryAllotted(
+                staff_id= r['staff_id'],
+                category= r['category']
+            )   
+            db.session.add(d)
+            db.session.commit()
+            return jsonify({"message": "category request is added successfully"})
+        except:
+            abort(401,message="Failed to add category")
+
+class UpdateSetting(Resource):
+    #@token_required
+    def patch(self):
+        try:
+            '''
+            {
+            "user_id":   ,
+            "notification":  , //1 for ON 0 for OFF
+            "email_notif":  ,  //1 for ON 0 for OFF
+            "webhook_notif":  //1 for ON 0 for OFF
+            }
+            '''
+            r=request.json
+            #id=user.id
+            id=r['user_id']
+            user=User.query.filter_by(id=id).first()
+            if(r['notification'] is not None):
+               user.notification=r['notification']
+            if(r['email_notif'] is not None):
+                user.email_notif=r['email_notif']
+            if(r['webhook_notif'] is not None):
+                user.webhook_notif=r['webhook_notif']
+            db.session.add(user)
+            db.session.commit()
+            return jsonify({"message": "settings updates successfully"})
+        except:
+            abort(401,message="Failed to update settings")
+# @app.route("/users", methods=["GET"])
+# @token_required
+# def get_users(current_user):
+#     print(current_user,current_user.id,current_user.email)
+#     users = User.query.all()
+#     results = [
+#         {
+#             "user_id": user.id,
+#             "user_name": user.username,
+#             "name": user.name,
+#             "email_id": user.email,
+#             "role_id": user.id
+#         } for user in users]
+
+#     return jsonify(results)

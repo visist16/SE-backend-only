@@ -48,6 +48,7 @@ class Response(db.Model):         #Response to Tickets
 class CategoryAllotted(db.Model):
     staff_id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.Integer, primary_key=True)
+    is_approved = db.Column(db.Boolean,default=False) #requested by staff,approved by admin
 
 class Topic(db.Model):
     topic_id = db.Column(db.Integer, primary_key=True)
@@ -60,10 +61,31 @@ class Matches(db.Model):
 
 class FAQ(db.Model):
     topic_id = db.Column(db.Integer, primary_key=True)
-    solution_post_id = db.Column(db.Integer,nullable=False)
+    solution_post_id = db.Column(db.Integer,nullable=False) #talk to him
     is_approved = db.Column(db.Boolean,default=False) #requested by staff,approved by admin
 
 class Subscription(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.Integer, primary_key=True) #category id
 
+#Function to create default admin user
+from sqlalchemy import func
+def create_default_admin():
+    row_count = db.session.query(func.count()).select_from(User).scalar()
+    if row_count<=0:
+        # Create admin user if it doesn't exist
+        admin = User(
+            username='admin1',
+            password='admin',
+            email='admin@iitm.ac.in',
+            role=3,  # Role ID for admins
+            name='admin',
+            discourse_id=3,  # Set discourse ID as needed
+            status=True  # Set status as needed
+        )
+        db.session.add(admin)
+        db.session.commit()
+
+# # Attach event listener to create default admin user after database creation
+# event.listen(db.metadata, 'after_create', create_default_admin)
+    

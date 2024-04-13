@@ -46,13 +46,29 @@ api.add_resource(MatchTopic, '/api/user/match')
 
 api.add_resource(CreateTopic, '/api/staff/createtopic')
 api.add_resource(EditTopic, '/api/staff/edittopic')
-
+#apis by ajeet
+api.add_resource(StaffProfile, '/api/staff/profile')
+api.add_resource(AllottedCategory, '/api/staff/category')
+api.add_resource(Respond, '/api/staff/respond')
+api.add_resource(RequestFAQ, '/api/staff/requestfaq')
+api.add_resource(RequestCategory, '/api/staff/requestcategory')
+api.add_resource(UpdateSetting, '/api/staff/updatesetting')
 ########################ADMIN APIS#####################################
 
 api.add_resource(CreateCategory, '/api/admin/createcategory')
 api.add_resource(EditCategory, '/api/admin/editcategory')
+api.add_resource(AdminHome, '/api/admin/home')
+#for getting staff and user details , use "/users" api and use jinja2 on frontend 
+# put condition for staff management role==2
+#for user management role==1
+api.add_resource(AdminGetRequest,'/api/admin/admingetrequest')
+api.add_resource(AdminPostRequest,'/api/admin/adminpostrequest')
+api.add_resource(RevokeStaff,'/api/admin/revokestaff')
+api.add_resource(RevokeCategory,'/api/admin/revokecategory')
+api.add_resource(AddStaff,'/api/admin/addstaff')
+api.add_resource(BlockUser,'/api/admin/blockuser')
 
 from application.routes import *
 if __name__ == '__main__':
   # Run the Flask app
-  app.run(debug=True)
+  app.run(debug=True,port=5000)

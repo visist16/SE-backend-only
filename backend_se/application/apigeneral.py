@@ -122,6 +122,7 @@ class Verification(Resource):
 #ajeet
 class Login(Resource):
     def post(self):
+        #create_default_admin()
         print("test login1")
         flag=False
         if request.is_json:
@@ -167,7 +168,7 @@ class Login(Resource):
                     'exp': datetime.utcnow() + timedelta(minutes=80)
                 }, Config.SECRET_KEY, algorithm="HS256")
                 # access_token = create_access_token(identity=email)
-                # print(token)
+                print(token)
             else:
                 abort(401, message="Account is not activte, verify email")
             if(flag):

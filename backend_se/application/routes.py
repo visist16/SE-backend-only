@@ -19,7 +19,7 @@ from werkzeug.exceptions import HTTPException
 from application import index
  
 
-local_token=""
+local_token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZXhwIjoxNzEyOTEyNzA4fQ.ozVWm0cYyoCHFiYa0AdweaYOXEHqSDAfNqK3tpgob54"
 
 #jwt tockenisation de-dockenization
 #ajeet
@@ -32,7 +32,7 @@ def token_required(function):
 		
 		except:
 			return jsonify({"status":'unsuccessful, missing the authtoken'})
-		# auth_token =local_token
+		
 		try: 
 			output = jwt.decode(auth_token,Config.SECRET_KEY,algorithms=["HS256"])
 			#print(output)
@@ -76,17 +76,20 @@ def home_ram():
 
 
 @app.route("/users", methods=["GET"])
-@token_required
-def get_users(current_user):
-    print(current_user)
+#@token_required
+def get_users():
+	
+#def get_users(current_user):
+    #print(current_user,current_user.id,current_user.email)
+	
     users = User.query.all()
     results = [
         {
-            "user_id": user.user_id,
-            "user_name": user.user_name,
-            #"name": user.name,
-            "email_id": user.email_id,
-            "role_id": user.role_id
+            "user_id": user.id,
+            "user_name": user.username,
+            "name": user.name,
+            "email_id": user.email,
+            "role_id": user.role
         } for user in users]
 
     return jsonify(results)

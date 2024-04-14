@@ -167,8 +167,8 @@ class RevokeStaff(Resource):
                 receiver = "21f1000907@ds.study.iitm.ac.in"
                 sub="{} is simple user".format(user.username)
                 msg="Dear {},".format(user.email)+ "\n\nYour support staff mimbership has been revoked."+"\n\nRegards"
-                file1=send_email_ER.delay(receiver,sub,msg)
-                webhook_task.delay(msg)
+                send_email_ER.delay(receiver,sub,msg) if user.email_notif==1 else None
+                webhook_task.delay(msg)  if user.webhook_notif==1 else None
             return jsonify({'message':'staff status revoked'})
         except:
             abort(401,message="failed")
@@ -194,8 +194,8 @@ class RevokeCategory(Resource):
             receiver = "21f1000907@ds.study.iitm.ac.in"
             sub="{} -category revoked".format(user.username)
             msg="Dear {},".format(user.email)+ "\n\nYour {} category has been revoked".format(cat)+"\n\nRegards"
-            file1=send_email_ER.delay(receiver,sub,msg)
-            webhook_task.delay(msg)
+            send_email_ER.delay(receiver,sub,msg) if user.email_notif==1 else None
+            webhook_task.delay(msg)  if user.webhook_notif==1 else None
             return jsonify({'message':'category for given staff revoked'})
         except:
             abort(401,message="failed")
@@ -222,8 +222,8 @@ class AddStaff(Resource):
             receiver = "21f1000907@ds.study.iitm.ac.in"
             sub="{} is staff member".format(user.username)
             msg="Dear {},".format(user.email)+ "\n\nYou are a support staff now. welcome!"+"\n\nRegards"
-            file1=send_email_ER.delay(receiver,sub,msg)
-            webhook_task.delay(msg)
+            send_email_ER.delay(receiver,sub,msg) if user.email_notif==1 else None
+            webhook_task.delay(msg)  if user.webhook_notif==1 else None
             return jsonify({'message':'user is staff now'})
         except:
             abort(401,message="failed")
@@ -251,9 +251,8 @@ class BlockUser(Resource):
             receiver = "21f1000907@ds.study.iitm.ac.in"
             sub="{} is blocked".format(user.username)
             msg="Dear {},".format(user.email)+ "\n\nYou are blocked due to violation of term and conditions."+"\n\nRegards"
-            file1=send_email_ER.delay(receiver,sub,msg)
-            msg1={"text": msg}
-            webhook_task.delay(msg)
+            send_email_ER.delay(receiver,sub,msg) if user.email_notif==1 else None
+            webhook_task.delay(msg)  if user.webhook_notif==1 else None
             return jsonify({'message':'user is blocked'})
         except:
             abort(401,message="failed")

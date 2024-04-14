@@ -5,6 +5,59 @@ from application.models import db, User, Ticket, Response
 import requests
 from datetime import datetime, timedelta
 from celery.schedules import crontab
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email.mime.application import MIMEApplication
+from email import encoders
+import os
+import time
+from json import dumps
+from httplib2 import Http
+
+# Copy the webhook URL from the Chat space where the webhook is registered.
+# The values for SPACE_ID, KEY, and TOKEN are set by Chat, and are included
+# when you copy the webhook URL.
+@celery.task()
+def webhook_task(msg1):
+    time.sleep(2)
+    """Google Chat incoming webhook quickstart."""
+    url = "https://chat.googleapis.com/v1/spaces/AAAA1006yog/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=0j2Kg6Ma1Q4nB6Jn9ZXwk5eIkZdvokzieBaX_9LQxT4"
+    #app_message = {"text": "Hello from a Python script!"}
+    app_message={"text":msg1}
+    message_headers = {"Content-Type": "application/json; charset=UTF-8"}
+    http_obj = Http()
+    response = http_obj.request(
+        uri=url,
+        method="POST",
+        headers=message_headers,
+        body=dumps(app_message),
+    )
+    return("confirmation:msg send in gchat")
+
+#sending export jobs eamil to list of users
+@celery.task()
+def send_email_ER(rlist,subject,message):
+    print("test1 daily")
+    time.sleep(5)
+    #for ri in rlist:
+    sender1="005ajeet@gmail.com"
+    ri=rlist
+    msg = MIMEMultipart()
+    msg['From']=sender1
+    msg['To']=ri
+    msg['Subject']=subject
+    msg.attach(MIMEText(message))
+    smtp_server='smtp.gmail.com'
+    smtp_port=587
+    smtp_username=sender1
+    smtp_password="wegjxuedgcurcpsa"
+    with smtplib.SMTP(smtp_server,smtp_port) as server:
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        server.sendmail(sender1,ri,msg.as_string())
+    return ("confirmation: mail send done")   
 
 @celery.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):

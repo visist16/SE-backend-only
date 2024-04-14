@@ -94,6 +94,16 @@ def get_users():
 
     return jsonify(results)
 
+#send eamail
+from mail import send_email
+@app.route("/sendmail")
+def sendmail():
+    sender = "005ajeet@gmail.com"
+    receiver = "21f1000907@ds.study.iitm.ac.in"
+    sub="jai ho siatam ji from direct mail"
+    msg="sitaram"
+    file="ram.pdf"
+    return send_email(sender,receiver,sub,msg,file)
 
 
 # from application.workers import celery

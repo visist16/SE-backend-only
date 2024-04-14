@@ -15,6 +15,8 @@ from .config import Config
 from werkzeug.exceptions import HTTPException 
 from application import index
 from sqlalchemy import func
+from application.tasks import *
+from application.quickstart import *
 
 API_TOKEN="77a052969dae8a3d77c97021a8b53ef18d191761a4079c0487f255eadfcfcaff"
 USER="21f1007034"                ##Just configured only for Unit Testing
@@ -162,6 +164,11 @@ class RevokeStaff(Resource):
                     user.role=1
                     db.session.add(user)
                     db.session.commit()
+                receiver = "21f1000907@ds.study.iitm.ac.in"
+                sub="{} is simple user".format(user.username)
+                msg="Dear {},".format(user.email)+ "\n\nYour support staff mimbership has been revoked."+"\n\nRegards"
+                file1=send_email_ER.delay(receiver,sub,msg)
+                webhook_task.delay(msg)
             return jsonify({'message':'staff status revoked'})
         except:
             abort(401,message="failed")
@@ -180,9 +187,15 @@ class RevokeCategory(Resource):
             staff_id=r['staff_id']
             cat=r['category']
             category=CategoryAllotted.query.filter_by(staff_id=staff_id, category=cat).first()
+            user=User.query.filter_by(id=staff_id).first()
             if(category is not None):
                 db.session.delete(category)
                 db.session.commit()
+            receiver = "21f1000907@ds.study.iitm.ac.in"
+            sub="{} -category revoked".format(user.username)
+            msg="Dear {},".format(user.email)+ "\n\nYour {} category has been revoked".format(cat)+"\n\nRegards"
+            file1=send_email_ER.delay(receiver,sub,msg)
+            webhook_task.delay(msg)
             return jsonify({'message':'category for given staff revoked'})
         except:
             abort(401,message="failed")
@@ -206,6 +219,11 @@ class AddStaff(Resource):
                     user.role=2
                     db.session.add(user)
                     db.session.commit()
+            receiver = "21f1000907@ds.study.iitm.ac.in"
+            sub="{} is staff member".format(user.username)
+            msg="Dear {},".format(user.email)+ "\n\nYou are a support staff now. welcome!"+"\n\nRegards"
+            file1=send_email_ER.delay(receiver,sub,msg)
+            webhook_task.delay(msg)
             return jsonify({'message':'user is staff now'})
         except:
             abort(401,message="failed")
@@ -229,6 +247,13 @@ class BlockUser(Resource):
                     user.status=0
                     db.session.add(user)
                     db.session.commit()
+            
+            receiver = "21f1000907@ds.study.iitm.ac.in"
+            sub="{} is blocked".format(user.username)
+            msg="Dear {},".format(user.email)+ "\n\nYou are blocked due to violation of term and conditions."+"\n\nRegards"
+            file1=send_email_ER.delay(receiver,sub,msg)
+            msg1={"text": msg}
+            webhook_task.delay(msg)
             return jsonify({'message':'user is blocked'})
         except:
             abort(401,message="failed")

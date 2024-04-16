@@ -7,20 +7,20 @@ from application.apigeneral import *
 from application.ticketapi import *
 
 
-api.add_resource(TicketAPI, '/api/ticket')
-api.add_resource(UserAPI,'/api/user')
-api.add_resource(FAQApi, '/api/faq', '/api/faq/<int:ticket_id>')
-api.add_resource(ResponseAPI_by_ticket, '/api/respTicket') #For getting responses with ticket_id
-api.add_resource(ResponseAPI_by_response_id, '/api/respResp') #For getting responses with response_id
-api.add_resource(ResponseAPI_by_user, '/api/respUser') #For getting responses with user id.
-api.add_resource(TicketAll, '/api/ticketAll') #For getting all tickets
-api.add_resource(getResolutionTimes, '/api/getResolutionTimes') # For getting resolution times of support agents, only accessible to managers.
-api.add_resource(flaggedPostAPI, '/api/flaggedPosts') #For getting the flagged posts.
-api.add_resource(getResponseAPI_by_ticket,'/api/getResponseAPI_by_ticket') #Only for getting the responses by ticket ID
-api.add_resource(ImportResourceUser,'/api/importUsers')
-api.add_resource(TicketDelete,'/api/ticket/<int:ticket_id>')
-api.add_resource(UserDelete,'/api/user/<int:user_id>') 
-api.add_resource(ResponseAPI_by_responseID_delete, '/api/respRespDel/<int:responder_id>/<int:response_id>')
+# api.add_resource(TicketAPI, '/api/ticket')
+# api.add_resource(UserAPI,'/api/user')
+# #api.add_resource(FAQApi, '/api/faq', '/api/faq/<int:ticket_id>')
+# api.add_resource(ResponseAPI_by_ticket, '/api/respTicket') #For getting responses with ticket_id
+# api.add_resource(ResponseAPI_by_response_id, '/api/respResp') #For getting responses with response_id
+# api.add_resource(ResponseAPI_by_user, '/api/respUser') #For getting responses with user id.
+# api.add_resource(TicketAll, '/api/ticketAll') #For getting all tickets
+# api.add_resource(getResolutionTimes, '/api/getResolutionTimes') # For getting resolution times of support agents, only accessible to managers.
+# api.add_resource(flaggedPostAPI, '/api/flaggedPosts') #For getting the flagged posts.
+# api.add_resource(getResponseAPI_by_ticket,'/api/getResponseAPI_by_ticket') #Only for getting the responses by ticket ID
+# api.add_resource(ImportResourceUser,'/api/importUsers')
+# api.add_resource(TicketDelete,'/api/ticket/<int:ticket_id>')
+# api.add_resource(UserDelete,'/api/user/<int:user_id>') 
+# api.add_resource(ResponseAPI_by_responseID_delete, '/api/respRespDel/<int:responder_id>/<int:response_id>')
 
 ########################GENERAL APIS###################################
 
@@ -41,11 +41,13 @@ api.add_resource(YourTickets, '/api/user/tickets')
 api.add_resource(NewTicket, '/api/user/newticket')
 api.add_resource(Recommendations, '/api/user/recommendations')
 api.add_resource(MatchTopic, '/api/user/match')
-
+api.add_resource(FAQs, '/api/user/faqs')
 ########################STAFF APIS#####################################
-
 api.add_resource(CreateTopic, '/api/staff/createtopic')
 api.add_resource(EditTopic, '/api/staff/edittopic')
+api.add_resource(Merge, '/api/staff/merge')
+api.add_resource(ResolveTopic, '/api/staff/resolvetopic')
+api.add_resource(ResolveTicket, '/api/staff/resolveticket')
 #apis by ajeet
 api.add_resource(StaffProfile, '/api/staff/profile')
 api.add_resource(AllottedCategory, '/api/staff/category')

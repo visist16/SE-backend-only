@@ -57,6 +57,56 @@ class EditTopic(Resource):
         }
         response = requests.put(f'http://localhost:4200/t/-/{id}.json',json=data, headers=headers)
         return response.json()
+    
+class Merge(Resource):
+    def put(self):
+        try:
+            r=request.json
+            ticket_id=r.get('ticket_id')
+            topic_id=r.get('topic_id')
+            t=Ticket.query.filter_by(id=ticket_id).first()
+            t.merged=topic_id
+            db.session.commit()
+            return jsonify({"message":"Merged Ticket with Topic"})
+        except:
+            abort(404,message="Failed to Merge the Ticket")
+
+class ResolveTicket(Resource):
+    def put(self):
+        try:
+            r=request.json
+            id=r.get('ticket_id')
+            t=Ticket.query.filter_by(id=id).first()
+            t.resolved=True
+            db.session.commit()
+            return jsonify({"message":"Resolved Ticket"})
+        except:
+            abort(404,message="Failed to Resolve Ticket")
+
+class ResolveTopic(Resource):
+    def put(self):
+        try:
+            r=request.json
+            resolution=r.get('resolution')
+            topic_id=r.get('topic_id')
+            data={
+                "raw":resolution,
+                "topic_id":topic_id
+            }
+            response = requests.post(f'http://localhost:4200/posts.json',json=data, headers=headers)
+            if response.status_code==200:
+                r=response.json
+                id=r.get('id')
+                t=Topic.query.filter_by(topic_id=topic_id).first()
+                t.solution_post_id=id
+                db.session.commit()
+                return jsonify({"message":"Resolved Topic"})
+            else:
+                abort(404,message="Failed to post the resolution")
+            
+        except:
+            abort(404,message="Failed to Resolve Topic")
+
 
 class StaffProfile(Resource):
     #@token_required
@@ -165,7 +215,7 @@ class RequestCategory(Resource):
 class UpdateSetting(Resource):
     #@token_required
     def patch(self):
-        try:
+        try: 
             '''
             {
             "user_id":   ,

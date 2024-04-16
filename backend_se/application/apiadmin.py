@@ -83,6 +83,7 @@ class AdminHome(Resource):
             response_count=db.session.query(func.count()).select_from(Response).scalar()
             #user=User.query.all()
             #row_count = db.session.query(func.count()).select_from(User).scalar()
+            print(user_count)
             return jsonify({'user_count':user_count,'staff_count':staff_count,'ticket_count':ticket_count,'topic_count':topic_count,'category_count':category_count,'faq_count':faq_count,'response_count':response_count})
         except:
             abort(401)

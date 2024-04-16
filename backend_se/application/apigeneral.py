@@ -103,7 +103,7 @@ class Registration(Resource):
 #ajeet      
 class Verification(Resource):
     def get(self):
-        email="005ajeet@gmail.com"
+        email="21f1000907@ds.study.iitm.ac.in"
         user1=User.query.filter_by(email=email).first()
         print(user1)
         if(user1.status==0):

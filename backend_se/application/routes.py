@@ -87,7 +87,6 @@ def get_users():
         {
             "user_id": user.id,
             "user_name": user.username,
-            "name": user.name,
             "email_id": user.email,
             "role_id": user.role
         } for user in users]

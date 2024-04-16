@@ -122,16 +122,20 @@ class MatchTopic(Resource):
         except:
             abort(401,message="Ticket didn't match")
 
-class FAQ(Resource):
-    def get(self):
-        faqs=FAQ.query.all()
-        data=[]
-        for faq in faqs:
-            id=faq.topic_id
-            sol_id=faq.solution_post_id
-            json={
-                "post_ids[]":sol_id
-            }
-            response = requests.put(f'http://localhost:4200/t/{id}/posts.json',json=json, headers=headers)
-            data=data.append(response)
 
+class FAQs(Resource):
+    def get(self):
+        try:
+            faqs=FAQ.query.all()
+            data=[]
+            for faq in faqs:
+                id=faq.topic_id
+                sol_id=faq.solution_post_id
+                json={
+                    "post_ids[]":sol_id
+                }
+                response = requests.put(f'http://localhost:4200/t/{id}/posts.json',json=json, headers=headers)
+                data=data.append(response)
+            return jsonify({"FAQS":data})
+        except:
+            abort(401,message="Error in fetching FAQ")

@@ -1,133 +1,105 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
-  title: Sociogrammers Student Query Management System - OpenAPI 3.0
-  description: This API describes the endpoints available for the software created by Team Sociogrammers for the Software Engineering Project.
-  version: "0.0.1"
-
-servers:
-  - url: http://127.0.0.1:5000
+  title: My Flask API Documentation
+  description: Documentation for various APIs in my Flask application
+  version: '1.0'
+  contact:
+    name: Visist Tallam
+    email: 21f2001553@ds.study.iitm.ac.in
 tags:
-  - name: Login
-    description: Login API Endpoint
-  - name: UserAPI
-    description: Endpoint to create, read, delete, and update Users
-  - name: TicketAPI
-    description: Endpoint to create, read, delete, and update Tickets
-  - name: FAQApi
-    description: Endpoint to create, read, delete, and update FAQ Items
-  - name: ResponseAPI_by_response_id
-    description: API for Responses by response ID
-  - name: ResponseAPI_by_user
-    description: API for Responses by User ID
-  - name: TicketAll
-    description: API for accessing ticket information by any user.
-  - name: getResolutionTimes
-    description: Access the resolution times for queries.
-  - name: flaggedPostAPI
-    description: Access all the flagged Posts.
-  - name: SearchAPI
-    description: Endpoint to retreive similar tickets based on query
-  - name: getResponseAPI_by_ticket
-    description: get responses by ticket ID
-  - name: importUsersAPI
-    description: Endpoint to batch import users
-  - name: CategoryAPI
-    description: Endpoint to manage categories
-  - name: ResponseAPI_by_ticket
-    description: Endpoint to manage responses using ticket id
-  - name: ResponseAPI_by_responseID_delete
-    description: Delete a response using response_id and responder_id
+  - name: Authentication
+    description: Endpoints related to user authentication
+  - name: User Management
+    description: Endpoints for managing user profiles and tickets
+  - name: Staff Actions
+    description: Endpoints accessible to staff members
+  - name: Admin Operations
+    description: Endpoints accessible to administrators
+  - name: Discourse Integration
+    description: Endpoints for interacting with Discourse forum
+  - name: Notifications
+    description: Endpoints for retrieving user notifications
+  - name: Support Topics
+    description: Endpoints related to support topics and categories
 paths:
-  /api/getResponseAPI_by_ticket:
-    post:
-      tags:
-        - getResponseAPI_by_ticket
-      summary: Provides the responses for a given ticket ID.
-      description: Accessible to all users.
-      operationId: postgetResponseAPI_by_ticket
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - ticket_id
-              properties:
-                ticket_id:
-                  type: integer
-                  example: 3
-                          
-      responses:
-        '200':
-          description: Successfully got all the responses for the given ticket ID
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                       $ref: '#/components/schemas/Response'
-                       
-                    example:  [{
-      "response_id": 2,
-      "ticket_id": 1,
-      "response": "The query you raised has been resolved.",
-      "responder_id": 5,
-      "response_timestamp": "Fri, 10 Mar 2023 06:36:58 GMT"
-    }]
-                  status: 
-                    type: string
-                    example: success
-                
-        '403':
-          description: Ticket ID is missing
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Please provide a ticket ID for which you need the responses."
-        '404':
-          description: "There are no tickets by that ID."
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "There are no tickets by that ID."
-      security:
-        - secret_authtoken: []
   /login:
     post:
+      summary: User login endpoint
+      description: Endpoint to authenticate users and generate JWT token
+      operationId: Login
       tags:
-        - Login
-      summary: Provides the secret authoken header which is used to authorize the user to access rest of the features.
-      description: Accessible to all users.
-      operationId: postLogin
+        - Authentication
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              required:
-                - email
-                - password
               type: object
               properties:
                 email:
                   type: string
-                  example: arya@arya.com
+                  description: User's email address
                 password:
                   type: string
-                  example: arya
+                  description: User's password
       responses:
         '200':
-          description: Successful Login
+          description: Successfully logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Login success message
+                  token:
+                    type: string
+                    description: JWT token for accessing protected endpoints
+                  id:
+                    type: integer
+                    description: User ID
+                  role:
+                    type: integer
+                    description: User role ID
+        '401':
+          description: Unauthorized (bad email or password)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message
+        '409':
+          description: Conflict (user does not exist)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message
+
+  /api/user/profile:
+    get:
+      summary: Get user profile
+      description: Retrieve user profile information
+      operationId: UserProfile
+      tags:
+        - User Management
+      parameters:
+        - name: user_id
+          in: query
+          description: User ID to fetch profile for
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response with user profile data
           content:
             application/json:
               schema:
@@ -136,28 +108,32 @@ paths:
                   data:
                     type: object
                     properties:
-                      message:
+                      username:
                         type: string
-                        example: Login Succeeded!
-                      token:
+                        description: User's username
+                      email:
                         type: string
-                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE2NzkwNjcwNDl9.X8nX4NR_GVNHkgDevB2g9ljg79fDQ4faB7NS4yjo34w 
-                      user_id:
+                        description: User's email address
+                      role:
                         type: integer
-                        example: 3
-                
-        '409':
-          description: User does not exist
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "User does not exist"
+                        description: User's role ID
+                      discourse_id:
+                        type: string
+                        description: User's Discourse ID
+                      status:
+                        type: integer
+                        description: User's status
+                      notification:
+                        type: boolean
+                        description: User's notification setting
+                      email_notif:
+                        type: boolean
+                        description: User's email notification setting
+                      webhook_notif:
+                        type: boolean
+                        description: User's webhook notification setting
         '401':
-          description: "Bad Email or Password"
+          description: Error response indicating failed to fetch user details
           content:
             application/json:
               schema:
@@ -165,47 +141,69 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Bad Email or Password"
-  /api/user:
+                    description: Error message
+
+  /api/user/tickets:
     get:
-      security: 
-        - secret_authtoken: []
+      summary: Get user's tickets
+      description: Retrieve tickets created by the user
+      operationId: YourTickets
       tags:
-        - UserAPI
-      summary: "Retreive all users"
-      description: "Retreive all users"
-      operationId: getUsers
+        - User Management
+      parameters:
+        - name: user_id
+          in: query
+          description: User ID to fetch tickets for
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
-          description: "Retreived all users successfully"
+          description: Successful response with user's ticket data
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  data: 
+                  data:
                     type: array
-                    items: 
+                    items:
                       type: object
                       properties:
-                          user_id:
-                            type: integer
-                            description: "Internal User ID assigned to each user" 
-                            example: 1
-                          user_name:
+                        id:
+                          type: integer
+                          description: Ticket ID
+                        title:
+                          type: string
+                          description: Ticket title
+                        description:
+                          type: string
+                          description: Ticket description
+                        date:
+                          type: string
+                          description: Ticket creation date
+                        category:
+                          type: string
+                          description: Ticket category
+                        tags:
+                          type: array
+                          items:
                             type: string
-                            description: "username corresponding to the user"
-                            example: "myusername"
-                          email_id: 
-                            type: string
-                            description: "email address corresponding to the user"
-                            example: "abc@example.com"
-                          role_id:
-                            type: integer
-                            description: "Internal Role ID assigned based on the type of user (student, admin, manager, support agent)"
-                            example: 1
-        '403':
-          description: Unauthorized User
+                            description: Ticket tags
+                        offensive:
+                          type: boolean
+                          description: Whether the ticket is offensive
+                        escalated:
+                          type: boolean
+                          description: Whether the ticket is escalated
+                        resolved:
+                          type: boolean
+                          description: Whether the ticket is resolved
+                        merged:
+                          type: boolean
+                          description: Whether the ticket is merged
+        '401':
+          description: Error response indicating failed to retrieve user's tickets
           content:
             application/json:
               schema:
@@ -213,45 +211,42 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "You are not authorized to view this page"
+                    description: Error message  
+
+  /api/user/newticket:
     post:
-      security:
-        - secret_authtoken: []
+      summary: Create a new ticket
+      description: Endpoint to create a new support ticket
+      operationId: NewTicket
       tags:
-        - UserAPI
-      summary: "Add a new user"
-      description: " Add a new user" 
-      operationId: postUserAPI
-      requestBody: 
+        - User Management
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
-              required:
-                - email_id
-                - role_id
               type: object
               properties:
-                email_id:
+                title:
                   type: string
-                  description: "Email address of the user to be added"
-                  example: "abc@example.com"
-                role_id:
+                  description: Title of the ticket
+                description:
+                  type: string
+                  description: Description of the ticket
+                creator:
                   type: integer
-                  example: 1
-                  description: "Role ID to be assigned to the user"
+                  description: User ID of the ticket creator
+                category:
+                  type: string
+                  description: Category of the ticket
+                tags:
+                  type: array
+                  items:
+                    type: string
+                    description: Tags associated with the ticket
       responses:
         '200':
-          description: "Added user successfully"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: 
-                    type: string
-                    example: "User created successfully"
-        '403':
-          description: Unauthorized User
+          description: Ticket created successfully
           content:
             application/json:
               schema:
@@ -259,49 +254,76 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "You are not authorized to view this page"
-    patch:
-      security:
-        - secret_authtoken: []
+                    description: Success message indicating ticket creation
+        '401':
+          description: Error response indicating failed to create ticket
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message
+ 
+  /api/user/recommendations:
+    get:
+      summary: Get recommendations before creating tickets
+      description: Retrieve recommendations based on category and tags to assist users in issue matching.
       tags:
-        - UserAPI
-      summary: "Update an existing user"
-      description: "Update details of an existing user" 
-      operationId: patchUserAPI
-      requestBody: 
+        - User Management
+      operationId: Recommendations
+      parameters:
+        - name: category
+          in: query
+          description: Category ID for recommendations
+          required: true
+          schema:
+            type: integer
+        - name: tags
+          in: query
+          description: Tags associated with user's issue
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Successful response with recommendations data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /api/user/match:
+    post:
+      summary: Match user's issue with a topic
+      description: Match a user's issue with a topic instead of creating a new ticket.
+      tags:
+        - User Management
+      operationId: MatchTopic
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
-              required: 
-                - user_id
-                
               type: object
               properties:
                 user_id:
                   type: integer
-                  example: 1
-                user_name:
-                  type: string
-                  example: "myusername"
-                email_id:
-                  type: string
-                  example: "abc@example.com"
-                password:
-                  type: string
-                  example: "password12345"
+                  description: User ID
+                topic_id:
+                  type: integer
+                  description: Topic ID to match with user's issue
       responses:
         '200':
-          description: "User updated successfully"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: 
-                    type: string
-                    example: "User updated successfully"
-        '403':
-          description: Only Admins can edit email
+          description: Successful response indicating issue matched with topic
           content:
             application/json:
               schema:
@@ -309,119 +331,29 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "You are can't edit email"
-        '400':
-          description: "Bad Request. Error in updating user. See message"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "user_id must exist and should be integer"
-  /api/user/{user_id}:
-    delete:
-      parameters:
-        - name: user_id
-          in: path
-          description: User ID
-          required: true
-          schema:
-            type: integer
-      security: 
-        - secret_authtoken: []
-      tags:
-        - UserAPI
-      summary: "Delete Particular user"
-      description: "Delete user by user_id"
-      operationId: deleteUserAPI
-      responses:
-        '200':
-          description: "User deleted successfully"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: 
-                    type: string
-                    example: "User deleted successfully"
-        '403':
-          description: Only Admins can delete users
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Unauthorized"
-        '400':
-          description: "Bad Request. Error in updating user. See message"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "user_id must exist and should be integer"
-  /api/ticket:
-    get:
-      security: 
-        - secret_authtoken: []
-      tags:
-        - TicketAPI
-      summary: "Retreive all Tickets corresponding to a user"
-      description: "Retreive all Tickets corresponding to a user"
-      operationId: getTickets
-      responses:
-        '200':
-          description: "Retreived all tickets successfully"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: 
-                    type: array
-                    items: 
-                      $ref: '#/components/schemas/Ticket'
+                    description: Success message
 
-        '403':
-          description: Unauthorized User
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "You are not authorized to view this page"
-    post:
-      security:
-        - secret_authtoken: []
+  /api/user/faqs:
+    get:
+      summary: Fetch FAQs
+      description: Retrieve frequently asked questions (FAQs) and update posts accordingly.
       tags:
-        - TicketAPI
-      summary: "Add a new Ticket"
-      description: " Add a new Ticket" 
-      operationId: postTicketAPI
-      requestBody: 
-        $ref: "#/components/requestBodies/Ticket_part"
+        - User Management
+      operationId: FAQs
       responses:
         '200':
-          description: "Ticket created successfully"
+          description: Successful response with FAQ data
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: 
-                    type: string
-                    example: "Ticket created successfully"
-        '403':
-          description: Unauthorized User
+                  FAQs:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          description: Error response indicating failed to fetch FAQs
           content:
             application/json:
               schema:
@@ -429,127 +361,90 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "You are not authorized to view this page"
-    patch:
-      security:
-        - secret_authtoken: []
+                    description: Error
+
+  /api/staff/createtopic:
+    post:
+      summary: Create a new topic from a local ticket
+      description: Create a new Discourse topic based on a local ticket for staff members.
       tags:
-        - TicketAPI
-      summary: "Update an existing Ticket"
-      description: "Update details of an existing Ticket" 
-      operationId: patchTicketAPI
-      requestBody: 
+        - Staff Actions
+      operationId: CreateTopic
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
+                ticket_id:
+                  type: integer
+                  description: ID of the local ticket to create a topic from
+                cat_id:
+                  type: integer
+                  description: Category ID for the new Discourse topic
+      responses:
+        '200':
+          description: Successful response with topic creation details
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/staff/edittopic:
+    patch:
+      summary: Edit an existing topic
+      description: Edit the title and category of an existing Discourse topic.
+      tags:
+        - Staff Actions
+      operationId: EditTopic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                topic_id:
+                  type: integer
+                  description: ID of the topic to edit
                 title:
                   type: string
-                  description: "Title of the ticket created by the user"
-                  example: "ID Card Address Error"
-                description: 
-                  type: string
-                  description: "Ticket description"
-                  example: "The address on my ID card is incorrect"
-                number_of_upvotes:
+                  description: New title for the topic
+                category_id:
                   type: integer
-                  description: "Number of time the ticket has been upvoted"
-                  example: 10
-                is_read: 
-                  type: boolean
-                  example: true
-                  description: "true if ticket has been read by a support agent. false otherwise"
-                is_open:
-                  type: boolean
-                  example: false
-                  description: "true if ticket is still unresolved. false if resolved"
-                is_FAQ: 
-                  type: boolean
-                  example: true
-                  description: "true if ticket has been suggested by support agent to the admin to add to the FAQ. false otherwise"
-                is_offensive:
-                  type: boolean
-                  example: false
-                  description: "true if a support agent has flagged this post, false otherwise"
-                ticket_id: 
-                  type: integer
-                  example: 1
-                rating:
-                  type: integer
-                  example: 2
-
+                  description: New category ID for the topic
       responses:
         '200':
-          description: "Ticket updated successfully"
+          description: Successful response with updated topic details
           content:
             application/json:
               schema:
                 type: object
-                properties:
-                  message: 
-                    type: string
-                    example: "Ticket updated successfully"
-        '403':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "You are not authorized to access this"
-        '400':
-          description: "Bad Request. Error in updating ticket. See message"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Please mention the ticketId field in your form"
-        '404':
-          description: Ticket not found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "There is no such ticket by that ID"
-  /api/ticket/{ticket_id}:
-    parameters:
-        - name: ticket_id
-          in: path
-          description: Ticket ID
-          required: true
-          schema:
-            type: integer
-    delete:
-      security: 
-        - secret_authtoken: []
+
+  /api/staff/merge:
+    put:
+      summary: Merge a ticket with a topic
+      description: Merge a ticket with a specified Discourse topic.
       tags:
-        - TicketAPI
-      summary: "Delete a Ticket"
-      description: "Delete Ticket by ticket_id"
-      operationId: deleteTicketAPI
+        - Staff Actions
+      operationId: Merge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ticket_id:
+                  type: integer
+                  description: ID of the ticket to merge
+                topic_id:
+                  type: integer
+                  description: ID of the topic to merge with
       responses:
         '200':
-          description: "Ticket deleted successfully"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: 
-                    type: string
-                    example: "Ticket deleted successfully"
-
-        '400':
-          description: "Bad Request. Error in deleting ticket. See message"
+          description: Successful response confirming ticket merge
           content:
             application/json:
               schema:
@@ -557,349 +452,111 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "No such ticket_id exists for the user"      
+
+  /api/staff/resolveticket:
+    put:
+      summary: Resolve a ticket
+      description: Mark a ticket as resolved.
+      tags:
+        - Staff Actions
+      operationId: ResolveTicket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ticket_id:
+                  type: integer
+                  description: ID of the ticket to resolve
+      responses:
+        '200':
+          description: Successful response confirming ticket resolution
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /api/staff/resolvetopic:
+    put:
+      summary: Resolve a topic with a resolution
+      description: Post a resolution to a topic and mark it as resolved.
+      tags:
+        - Staff Actions
+      operationId: ResolveTopic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resolution:
+                  type: string
+                  description: Resolution text for the topic
+                topic_id:
+                  type: integer
+                  description: ID of the topic to resolve
+      responses:
+        '200':
+          description: Successful response confirming topic resolution
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
   
-  /api/faq:
+  /api/staff/profile:
     get:
-      security: 
-        - secret_authtoken: []
+      summary: Get staff profile details
+      description: Retrieve the profile details of a staff member by ID.
       tags:
-        - FAQApi
-      summary: Retreives all the tickets that have been suggested for the FAQ section
-      description: Retreives all the tickets that have been suggested for the FAQ section
-      operationId: getFAQApi
+        - Staff Actions
+      operationId: StaffProfile
       responses:
         '200':
-          description: "Retreived all tickets successfully"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: 
-                    type: array
-                    items: 
-                        allOf:
-                          - $ref: "#/components/schemas/Ticket"
-                          - $ref: "#/components/schemas/FAQ"
-
-    post:
-      security: 
-        - secret_authtoken: []
-      tags:
-        - FAQApi
-      summary: Add a new ticket to FAQ Schema
-      description: Add a new ticket to FAQ Schema
-      operationId: postFAQApi
-      requestBody: 
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/FAQ"
-      responses:
-        '200':
-          description: "FAQ item added successfully"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: 
-                    type: string
-                    example: "FAQ item added successfully"
-        '403':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Unauthorized"
-        '400':
-          description: "Bad Request. Error in updating ticket. See message"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "ticket_id is required and should be integer"
-    patch:
-      security: 
-        - secret_authtoken: []
-      tags:
-        - FAQApi
-      summary: Update an item in the FAQ Schema
-      description: Update an item in the FAQ Schema
-      operationId: patchFAQApi
-      requestBody: 
-        content:
-          application/json:
-            schema:
-              required:
-                - ticket_id
-              allOf:
-                - $ref: "#/components/schemas/FAQ"
-      responses:
-        '200':
-          description: "FAQ item updated successfully"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: 
-                    type: string
-                    example: "FAQ item updated successfully"
-        '403':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Unauthorized"
-        '400':
-          description: "Bad Request. Error in updating ticket. See message"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "ticket_id is required and should be integer"
-  /api/faq/{ticket_id}:
-    parameters:
-        - name: ticket_id
-          in: path
-          description: Ticket ID
-          required: true
-          schema:
-            type: integer
-    delete:
-      security: 
-        - secret_authtoken: []
-      tags:
-        - FAQApi
-      summary: "Delete a FAQ Item"
-      description: "Delete a FAQ Item by ticket_id"
-      operationId: deleteFAQApi
-      responses:
-        '200':
-          description: "FAQ item deleted successfully"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message: 
-                    type: string
-                    example: "FAQ item deleted successfully"
-
-        '400':
-          description: "Bad Request. Error in deleting FAQ item. See message"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "ticket_id does not exist"      
-  /api/respRespDel/{responder_id}/{response_id}:
-    parameters:
-        - name: responder_id
-          in: path
-          description: Responder ID
-          required: true
-          schema:
-            type: integer
-        - name: response_id
-          in: path
-          description: Response ID
-          required: true
-          schema:
-            type: integer
-    delete:
-      security: 
-        - secret_authtoken: []
-      tags:
-        - ResponseAPI_by_responseID_delete
-      summary: "Delete a Response"
-      description: "Delete a Response"
-      operationId: deleteResponse
-      responses:
-        '200':
-          description: "Response deleted successfully"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: 
-                    type: string
-                    example: "success"
-
-        '404':
-          description: "Bad Request. Error in deleting Response. See message"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "You are not authorized to delete responses."  
-    
-  /api/respResp:
-    post:
-      tags:
-        - ResponseAPI_by_response_id
-      summary: Gets the response details for a given response ID.
-      description: Get response details for a particular response ID
-      operationId: getrespResp
-      requestBody:
-        content:
-          application/json:
-            schema:
-              required:
-                - response_id
-              type: object
-              properties:
-                response_id:
-                  type: integer
-                  example: 5
-                
-      responses:
-        '200':
-          description: Got all responses successfully
+          description: Successful response containing staff profile data
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   data:
-                    type: array
-                    items:
-                       $ref: '#/components/schemas/Response'
-                       
-                    example:  [{
-      "response_id": 2,
-      "ticket_id": 1,
-      "response": "The query you raised has been resolved.",
-      "responder_id": 5,
-      "response_timestamp": "Fri, 10 Mar 2023 06:36:58 GMT"
-    }]
-                  status: 
-                    type: string
-                    example: success    
-                      
-                
-        '403':
-          description: Please provide a response_id
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Please provide a response_id"
-        '404':
-          description: "There are no tickets by that ID."
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "There are no tickets by that ID."
-      security:
-        - secret_authtoken: []
-   
-  /api/respUser:
-    post:
-      tags:
-        - ResponseAPI_by_user
-      summary: Finds the responses given by a particular user (Support Agent mainly)
-      description: Accessible only by managers to get responses by a particular Support Agent.
-      operationId: getrespUser
-      requestBody:
-        content:
-          application/json:
-            schema:
-              required:
-                - responder_id
-              type: object
-              properties:
-                responder_id:
-                  type: integer
-                  example: 5
-      responses:
-        '200':
-          description: Got all responses successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                       $ref: '#/components/schemas/Response'
-                       
-                    example:  [{
-      "response_id": 2,
-      "ticket_id": 1,
-      "response": "The query you raised has been resolved.",
-      "responder_id": 5,
-      "response_timestamp": "Fri, 10 Mar 2023 06:36:58 GMT"
-    }]
-                  status: 
-                    type: string
-                    example: success    
-                      
-                
-        '403':
-          description: Please provide a responder_id
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Please provide a responder_id"
-        '404':
-          description: "Sorry, you don't have access to this feature!"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Sorry, you don't have access to this feature!"
-      security:
-        - secret_authtoken: []
-  /api/ticketAll:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                      email:
+                        type: string
+                      role:
+                        type: string
+                      discourse_id:
+                        type: string
+                      status:
+                        type: integer
+                      notification:
+                        type: integer
+                      email_notif:
+                        type: integer
+                      webhook_notif:
+                        type: integer
+
+  /api/staff/category:
     get:
+      summary: Get allotted categories for a staff member
+      description: Retrieve the categories allotted to a staff member.
       tags:
-        - TicketAll
-      summary: Gets the ticket details
-      description: General Purpose Get request for any user to obtain access to ticket details.
-      operationId: getticketAll
-      
+        - Staff Actions
+      operationId: AllottedCategory
       responses:
         '200':
-          description: Got all responses successfully
+          description: Successful response containing allotted categories
           content:
             application/json:
               schema:
@@ -908,451 +565,39 @@ paths:
                   data:
                     type: array
                     items:
-                       $ref: '#/components/schemas/Response'
-                       
-                    example:  [{
-      "ticket_id": 1,
-      "title": "Dashboard Not Loading",
-      "description": "Unresponsive Dashboard",
-      "creation_date": "Fri, 10 Mar 2023 06:36:58 GMT",
-      "creator_id": 2,
-      "number_of_upvotes": 20,
-      "is_read": true,
-      "is_open": false,
-      "is_offensive": false,
-      "is_FAQ": false,
-      "rating": 4
-    }]
-                  status: 
-                    type: string
-                    example: success    
-        '404':
-          description: "No tickets found."
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "No tickets found"
-      security:
-        - secret_authtoken: []
-    patch:
-      tags:
-        - TicketAll
-      summary: Update a ticket with partial/complete information
-      description: TicketAll Update
-      operationId: patchTicketAll
-      requestBody:
-        content:
-          application/json:
-            schema:
-              required:
-                - ticket_id
-              type: object
-              properties:
-                ticket_id:
-                  type: integer
-                  example: 5
-                title:
-                  type: string
-                  example: Change my profile photo
-                description:
-                  type: string
-                  example: Requesting change in profile photo
-                number_of_upvotes:
-                  type: integer
-                  example: 100
-                is_read:
-                  type: boolean
-                  example: false
-                is_open:
-                  type: boolean
-                  example: true
-                is_offensive:
-                  type: boolean
-                  example: false
-                is_FAQ:
-                  type: boolean
-                  example: false
-                rating:
-                  type: integer
-                  example: 4
-      responses:
-        '200':
-          description: the chosen ticket was updated successfully.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "success"
-        '403':
-          description: Client Side errors
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Please mention the ticketId field in your form"
-        '404':
-          description: Error
-          content:
-            application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      example: "There is no such ticket by that ID."
-      security:
-        - secret_authtoken: []
-    
-  /api/getResolutionTimes:
+                      type: object
+                      properties:
+                        staff_id:
+                          type: integer
+                        category:
+                          type: string
+
+  /api/staff/respond:
     post:
+      summary: Respond to a ticket
+      description: Post a response to a ticket.
       tags:
-        - getResolutionTimes
-      summary: gets resolution times for a particular ticket.
-      description: 'Get the resolution time by ticket ID'
-      operationId: getgetResolutionTimes
+        - Staff Actions
+      operationId: Respond
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              required:
-                - ticket_id
               type: object
               properties:
                 ticket_id:
                   type: integer
-                  example: 5
-      responses:
-        '200':
-          description: Got all details successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                       $ref: '#/components/schemas/Response'
-                       
-                    example:  [{
-      "creation_time": "Fri, 10 Mar 2023 06:36:58 GMT",
-      "days": 2,
-      "microseconds": 583678,
-      "resolution_time_datetime_format": "2 days, 21:40:12.583678",
-      "response_time": "Fri, 10 Mar 2023 06:36:58 GMT",
-      "seconds": 78012,
-      "ticket_id": 2,
-    }]
-                  status: 
-                    type: string
-                    example: success    
-        '404':
-          description: "Not authorized"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "You are not authorized to access this feature!"
-        
-        '403':
-          description: "Ticket Not closed yet"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "This ticket has not been closed yet."
-      security:
-        - secret_authtoken: []
-            
-  /api/flaggedPosts:
-    get:
-      tags:
-        - flaggedPostAPI
-      summary: gets resolution times for a particular ticket.
-      description: 'Get the flagged Posts'
-      operationId: getflaggedPostAPI
-      responses:
-        '200':
-          description: Got all flagged posts successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                       $ref: '#/components/schemas/Flagged_Post'
-                       
-                    example:  [{
-      "ticket_id": 5,
-      "flagger_id": 2,
-      "creator_id": 1,
-      "is_approved": true,
-      "is_rejected": false
-      
-    }]
-                  status: 
-                    type: string
-                    example: success    
-        '404':
-          description: "Not authorized"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "You are not authorized to access this feature."
-      security:
-        - secret_authtoken: []
-    patch:
-      tags:
-        - flaggedPostAPI
-      summary: Edit a ticket in the flagged posts database.
-      description: Edit a ticket in the flagged posts database.
-      operationId: patchflaggedPostAPI
-      requestBody:
-        content:
-          application/json:
-            schema:
-              required:
-                - ticket_id
-                - flagger_id
-                - creator_id
-              type: object
-              properties:
-                ticket_id:
-                  type: integer
-                  example: 5
-                flagger_id:
-                  type: integer
-                  example: 2
-                creator_id:
-                  type: integer
-                  example: 1
-                is_approved:
-                  type: boolean
-                  example: false
-                
-      responses:
-        '200':
-          description: the chosen ticket was added successfully.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-        '403':
-          description: Client Side errors
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "The person who created the post must be a student."
-        '404':
-          description: Error
-          content:
-            application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      example: "You are not authorized to access this feature."   
-    post:
-      tags:
-        - flaggedPostAPI
-      summary: Add a new ticket to the flagged posts database.
-      description: Add a new ticket to flagged posts.
-      operationId: postflaggedPostAPI
-      requestBody:
-        content:
-          application/json:
-            schema:
-              required:
-                - ticket_id
-                - flagger_id
-                - creator_id
-              type: object
-              properties:
-                ticket_id:
-                  type: integer
-                  example: 5
-                flagger_id:
-                  type: integer
-                  example: 2
-                creator_id:
-                  type: integer
-                  example: 1
-                
-      responses:
-        '200':
-          description: the chosen ticket was added successfully.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-        '403':
-          description: Client Side errors
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "The person who created the post must be a student."
-        '404':
-          description: Error
-          content:
-            application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      example: "You are not authorized to access this feature."
-      security:
-        - secret_authtoken: []
-  /api/search:
-    post:
-      security:
-        - secret_authtoken: []
-      tags:
-        - SearchAPI
-      summary: Retreive similar queries (tickets)
-      description: Retreive similar queries (tickets)
-      operationId: postSearchAPI
-      requestBody:
-        content:
-          application/json:
-            schema:
-              required:
-                - query
-              type: object
-              properties:
-                query:
+                  description: ID of the ticket being responded to
+                responder:
                   type: string
-                  example: "ID Card Error"
-      responses:
-        '200':
-          description: Similar queries (tickets) retreived succesfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: 
-                    type: array
-                    items: 
-                      $ref: '#/components/schemas/Ticket'
-        '403':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Unauthorized"
-  
-  /api/importUsers:
-     post:
-      security:
-        - secret_authtoken: []
-      tags:
-        - importUsersAPI
-      summary: "Batch Import New Users"
-      description: " Batch Import New Usersr" 
-      operationId: postimportUsersAPI
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                UploadedFile:
-                  type: string
-                  format: binary
-      responses:
-        '200':
-          description: Job added for further processing. User will receive an email notification upon completion
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-        '400':
-          description: Error
-  /api/respTicket:
-    patch:
-      security: 
-        - secret_authtoken: []
-      tags:
-        - ResponseAPI_by_ticket
-      summary: Edit a response
-      description: "Edit a  response"
-      operationId: patchRespTicketAPI
-      requestBody: 
-        content:
-          application/json:
-            schema:
-              required: 
-                - response_id
-                - response
-              type: object
-              properties:
-                response_id:
-                  type: integer
-                  example: 1
+                  description: ID or name of the staff member responding
                 response:
                   type: string
-                  example: "Thanks for the quick resolution"
+                  description: Response content
       responses:
         '200':
-          description: New Response Added Successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-        '400':
-          description: Bad Request
+          description: Successful response confirming the response submission
           content:
             application/json:
               schema:
@@ -1360,53 +605,30 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Please provide the response id"
-        '404':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "You are not authorized to post responses to a ticket."
+
+  /api/staff/requestfaq:
     post:
-      security: 
-        - secret_authtoken: []
+      summary: Request a FAQ
+      description: Request to add a topic and solution post ID to FAQs.
       tags:
-        - ResponseAPI_by_ticket
-      summary: Add a new response using ticket_id
-      description: "Add a new response using ticket_id"
-      operationId: postRespTicketAPI
-      requestBody: 
+        - Staff Actions
+      operationId: requestFAQ
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
-              required: 
-                - ticket_id
-                - response
               type: object
               properties:
-                ticket_id:
+                topic_id:
                   type: integer
-                  example: 1
-                response:
-                  type: string
-                  example: "Thanks for the quick resolution"
+                  description: ID of the topic to add to FAQs
+                solution_post_id:
+                  type: integer
+                  description: ID of the solution post related to the topic
       responses:
         '200':
-          description: New Response Added Successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-        '400':
-          description: Bad Request
+          description: Successful response confirming the FAQ request
           content:
             application/json:
               schema:
@@ -1414,71 +636,30 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Please provide the ticket id!"
-        '404':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "You are not authorized to post responses to a ticket."
-  /api/category:
-     get:
-      security: 
-        - secret_authtoken: []
+
+  /api/staff/requestcategory:
+    post:
+      summary: Request a category allotment
+      description: Request to allot a category to a staff member.
       tags:
-        - CategoryAPI
-      summary: "Retreive all categories for FAQ"
-      description: "Retreive all categories for FAQ"
-      operationId: getCategoryAPI
-      responses:
-        '200':
-          description: "Retreived all categories successfully"
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: 
-                    type: array
-                    items: 
-                      type: string
-     post:
-      security:
-        - secret_authtoken: []
-      tags:
-        - CategoryAPI
-      summary: "Manage Categories"
-      description: "Manage Categories" 
-      operationId: postCategoryAPI
-      requestBody: 
+        - Staff Actions
+      operationId: RequestCategory
+      requestBody:
+        required: true
         content:
           application/json:
             schema:
-              required: 
-                - category
-                
               type: object
               properties:
+                staff_id:
+                  type: integer
+                  description: ID of the staff member requesting the category
                 category:
                   type: string
-                  example: "Operational"
+                  description: Category to be allotted
       responses:
         '200':
-          description: New Category Added Successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-        '400':
-          description: Bad Request
+          description: Successful response confirming the category request
           content:
             application/json:
               schema:
@@ -1486,246 +667,359 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "category is required and should be string"
-        '403':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Unauthorized"
-       
-components:
 
-  schemas:
-
-    User:
-      required:
-        - user_id
-        - user_name
-        - email_id
-        - role_id
-        - password
-      properties:
-        user_id:
-          type: integer
-          description: "Internal User ID assigned to each user" 
-          example: 1
-        user_name:
-          type: string
-          description: "username corresponding to the user"
-          example: "myusername"
-        email_id: 
-          type: string
-          description: "email address corresponding to the user"
-          example: "abc@example.com"
-        role_id:
-          type: integer
-          description: "Internal Role ID assigned based on the type of user (student, admin, manager, support agent)"
-          example: 1
-        password:
-          type: string
-          description: "Password for logging in and authenticating users"
-          example: "password12345"
-      xml:
-        name: User
-        
-    Ticket:
-      required:
-        - title
-        - description
-        - number_of_upvotes
-        - is_read
-        - is_open
-        - is_offensive
-        - is_FAQ
-        - creation_date
-        - ticket_id
-        - creator_id
-      allOf:
-        - $ref: "#/components/requestBodies/Ticket_part"
-      type: object
-      properties:
-        title:
-          type: string
-          description: "Title of the ticket created by the user"
-          example: "ID Card Address Error"
-        description: 
-          type: string
-          description: "Ticket description"
-          example: "The address on my ID card is incorrect"
-        number_of_upvotes:
-          type: integer
-          description: "Number of time the ticket has been upvoted"
-          example: 10
-        is_read: 
-          type: boolean
-          example: true
-          description: "true if ticket has been read by a support agent. false otherwise"
-        is_open:
-          type: boolean
-          example: false
-          description: "true if ticket is still unresolved. false if resolved"
-        is_FAQ: 
-          type: boolean
-          example: true
-          description: "true if ticket has been suggested by support agent to the admin to add to the FAQ. false otherwise"
-        is_offensive:
-          type: boolean
-          example: false
-          description: "true if a support agent has flagged this post, false otherwise"
-        creation_date: 
-          type: string
-          format: date time
-          example: "2023-03-08 17:31:14.595349"
-          description: "Date and time caputured when ticket is created"
-        ticket_id:
-          type: integer
-          description: "Internal Ticket ID assigned to each Ticket" 
-          example: 1
-        creator_id:
-          type: integer
-          description: "User ID of the person who created the ticket"
-          example: 2
-        rating: 
-          type: integer
-          description: "Rating of the response to the ticket"
-          example: 5
-
-    Category:
-      required:
-        - category
-      type: object
-      properties:
-        category:
-          type: string
-          example: "operational"
-          description: "Different FAQ Categories"
-        
-    FAQ:
-      required:
-        - cateogory
-        - ticket_id 
-        - is_approved
-      allOf:
-        - $ref: "#/components/schemas/Category"
-      type: object
-      properties:
-        is_approved: 
-          type: boolean
-          example : false
-          description: "true if approved by admin/manager to add to FAQ, false otherwise"
-        ticket_id:
-          type: integer
-          description: "Internal Ticket ID assigned to each Ticket" 
-          example: 1
-
-    Flagged_Post:
-      required:
-        - ticket_id
-        - flagger_id
-        - creator_id
-        - is_approved
-        - is_rejected
-      type: object
-      properties:
-        ticket_id:
-          type: integer
-          description: Ticket ID of the flagged Ticket
-          example: 1
-        flagger_id:
-          type: integer
-          description: User ID of the support agent who flagged this ticket
-          example: 2
-        creator_id:
-          type: integer
-          description: User ID of the student who created this ticket
-          example: 1
-        is_approved:
-          type: boolean
-          description: Ticket is marked as offensive by the admin
-          example: true
-        is_rejected: 
-          type: boolean
-          description: Ticket is marked as not offensive by the admin
-          example: true
-      xml:
-        name: Flagged_Post
-    
-    Response:
-      required:
-        - response_id
-        - ticket_id
-        - response
-        - responder_id
-        - response_timestamp
-      type: object
-      properties:
-        response_id:
-          type: integer
-          description: Internal ID of the response for the given ticket.
-          example: 2
-        ticket_id:
-          type: integer
-          description: Ticket ID for which this response was given 
-          example: 1
-        response:
-          type: string
-          description: "String value of the response."
-          example: "Query resolved!!"
-        responder_id:
-          type: integer
-          description: User ID of the support agent who responded
-          example: 4
-        response_timestamp:
-          type: string
-          format: date time
-          description: Python timestamp for the response when it was posted
-          example: "Fri, 10 Mar 2023 06:36:58 GMT"
-      xml:
-        name: Response
-
-  securitySchemes:
-    secret_authtoken:
-      type: apiKey
-      name: secret_authtoken
-      in: header
-      
-  requestBodies:
-    Ticket_part:
-      content:
+  /api/staff/updatesetting:
+    patch:
+      summary: Update user settings
+      description: Update notification settings for a user.
+      tags:
+        - Staff Actions
+      operationId: UpdateSetting
+      requestBody:
+        required: true
+        content:
           application/json:
             schema:
               type: object
               properties:
-                title:
-                  type: string
-                  description: "Title of the ticket created by the user"
-                  example: "ID Card Address Error"
-                description: 
-                  type: string
-                  description: "Ticket description"
-                  example: "The address on my ID card is incorrect"
-                number_of_upvotes:
+                user_id:
                   type: integer
-                  description: "Number of time the ticket has been upvoted"
-                  example: 10
-                is_read: 
-                  type: boolean
-                  example: true
-                  description: "true if ticket has been read by a support agent. false otherwise"
-                is_open:
-                  type: boolean
-                  example: false
-                  description: "true if ticket is still unresolved. false if resolved"
-                is_FAQ: 
-                  type: boolean
-                  example: true
-                  description: "true if ticket has been suggested by support agent to the admin to add to the FAQ. false otherwise"
-                is_offensive:
-                  type: boolean
-                  example: false
-                  description: "true if a support agent has flagged this post, false otherwise"
+                  description: ID of the user whose settings will be updated
+                notification:
+                  type: integer
+                  description: Notification setting (1 for ON, 0 for OFF)
+                email_notif:
+                  type: integer
+                  description: Email notification setting (1 for ON, 0 for OFF)
+                webhook_notif:
+                  type: integer
+                  description: Webhook notification setting (1 for ON, 0 for OFF)
+      responses:
+        '200':
+          description: Successful response confirming the settings update
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /api/admin/createcategory:
+    post:
+      summary: Create a category
+      description: Endpoint to create a new category (restricted to admin)
+      tags:
+        - Admin Operations
+      operationId: CreateCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of the category
+                color:
+                  type: string
+                  description: Color code for the category
+      responses:
+        '200':
+          description: Successful response confirming category creation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /api/admin/editcategory:
+    patch:
+      summary: Update a category
+      description: Endpoint to update an existing category (restricted to admin)
+      tags:
+        - Admin Operations
+      operationId: EditCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: ID of the category to be updated
+                name:
+                  type: string
+                  description: New name for the category
+                color:
+                  type: string
+                  description: New color code for the category
+      responses:
+        '200':
+          description: Successful response confirming category update
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /api/admin/home:
+    get:
+      summary: Get admin dashboard statistics
+      description: Endpoint to fetch statistics for the admin dashboard
+      tags:
+        - Admin Operations
+      operationId: AdminHome
+      responses:
+        '200':
+          description: Successful response with admin dashboard statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_count:
+                    type: integer
+                  staff_count:
+                    type: integer
+                  ticket_count:
+                    type: integer
+                  topic_count:
+                    type: integer
+                  category_count:
+                    type: integer
+                  faq_count:
+                    type: integer
+                  response_count:
+                    type: integer
+
+  /api/admin/admingetrequest:
+    get:
+      summary: Retrieve pending category and FAQ requests
+      operationId: AdminGetRequest
+      responses:
+        '200':
+          description: Successful response
+      tags:
+        - Admin Operations
+  /api/admin/adminpostrequest:
+    patch:
+      summary: Process administrative responses to requests
+      operationId: AdminPostRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                section:
+                  type: string
+                staff_id:
+                  type: integer
+                category:
+                  type: string
+                cat_response:
+                  type: integer
+                topic_id:
+                  type: integer
+                solution_post_id:
+                  type: integer
+                faq_response:
+                  type: integer
+      responses:
+        '200':
+          description: Successful response
+      tags:
+        - Admin Operations
+  /api/admin/revokestaff:
+    patch:
+      summary: Revoke or update staff status
+      operationId: RevokeStaff
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                staff_id:
+                  type: integer
+                revoked:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+      tags:
+        - Admin Operations
+  /api/admin/revokecategory:
+    delete:
+      summary: Revoke a category for a staff member
+      operationId: RevokeCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                staff_id:
+                  type: integer
+                category:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+      tags:
+        - Admin Operations
+  /api/admin/addstaff:
+    patch:
+      summary: Add user as staff member
+      operationId: AddStaff
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                add_staff:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+      tags:
+        - Admin Operations
+  /api/admin/blockuser:
+    patch:
+      summary: Block or unblock user
+      operationId: BlockUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                blocked:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+      tags:
+        - Admin Operations
+  
+    /api/discourse/self_account/activate:
+    get:
+      summary: Activate or deactivate user account
+      operationId: Verification
+      responses:
+        '200':
+          description: Successful activation/deactivation
+      tags:
+        - Discourse Integration
+  /api/discourse/register:
+    post:
+      summary: Register a new user
+      operationId: Registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: User registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  user:
+                    type: string
+                  email:
+                    type: string
+                  role:
+                    type: integer
+                  message:
+                    type: string
+                  code:
+                    type: integer
+      tags:
+        - Discourse Integration
+ 
+  /api/notifications:
+    get:
+      summary: Retrieve all notifications for a user
+      operationId: Notifications
+      responses:
+        '200':
+          description: Successful retrieval of notifications
+          content:
+            application/json:
+              schema:
+                type: object
+      tags:
+        - Notifications
+
+  /api/topics:
+    get:
+      summary: Retrieve topics by category ID or category slug
+      operationId: Topics
+      parameters:
+        - in: query
+          name: slug
+          schema:
+            type: string
+          description: Slug of the category
+        - in: query
+          name: id
+          schema:
+            type: integer
+          description: ID of the category
+      responses:
+        '200':
+          description: Successful retrieval of topics
+          content:
+            application/json:
+              schema:
+                type: object
+      tags:
+        - Support Topics
+
+  /api/categories:
+    get:
+      summary: Retrieve all categories
+      operationId: Categories
+      responses:
+        '200':
+          description: Successful retrieval of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+      tags:
+        - Categories

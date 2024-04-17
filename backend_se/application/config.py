@@ -14,6 +14,8 @@ class Config():
     SECURITY_TOKEN_AUTHENTICATION_HEADER = "Authentication-Token"
     CELERY_BROKER_URL = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND = "redis://localhost:6379/2"
+    API_TOKEN="805203cb88be4b6020394bb489667f1052bc2fb93ad1d66cc836f2dbfd0c69af"
+    USER="21f1000907"
 
 class LocalDevelopmentConfig(Config):
     SQLITE_DB_DIR = os.path.join(basedir, "../db_directory")
@@ -37,6 +39,8 @@ class LocalDevelopmentConfig(Config):
     CACHE_TYPE = 'RedisCache'
     CACHE_REDIS_HOST = 'localhost'
     CACHE_REDIS_PORT = 6379
+    API_TOKEN="805203cb88be4b6020394bb489667f1052bc2fb93ad1d66cc836f2dbfd0c69af"
+    USER="21f1000907"
     try:
         MAILGUN_API_KEY = os.environ.get('MG_API_KEY')
         SEARCH_API_KEY = os.environ.get('SEARCH_API_KEY')
